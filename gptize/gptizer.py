@@ -51,7 +51,16 @@ class GPTizer:
                 self.project.files.append(file_obj)
 
     def load_file_content(self, file: File) -> None:
-        """Load the content of the file in different encodings if necessary."""
+        try:
+            with open(file.directory, 'rb') as f:
+                if b'\0' in f.read(1024):
+                    file.is_binary = True
+                    logging.info(f"Binary file detected: {file.file_name}")
+                    return
+        except IOError as e:
+            logging.error(f"Error reading file {file.directory}: {e}")
+            return
+
         for encoding in Settings.DEFAULT_ENCODINGS:
             try:
                 with open(file.directory, 'r', encoding=encoding) as f:
