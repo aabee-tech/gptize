@@ -5,6 +5,7 @@
 ## Features
 - Exception handling for files based on `.gitignore`.
 - Support for various encodings when reading files.
+- Customizable output file naming based on the input file or directory name.
 - Report generation including all processed files.
 
 ## Installation
@@ -17,20 +18,35 @@ pip install gptize
 This command will install `gptize` and all its dependencies. After installation, you can use `gptize` from the command line anywhere.
 
 ## Usage
-To run gptize, use the command line:
+To run gptize, you have several options:
+
+### Basic Usage
+Simply invoke gptize in the command line to process the current directory:
 ```bash
 gptize
 ```
+This will process all files in the current directory and generate a report with a default name like gptize-output-folder-YYYYMMDD-HHMMSS.txt.
 
-If you need additional options:
+### Specifying a Directory
+To process a specific directory, use:
 ```bash
-gptize [path] [-o output_path] [--debug]
+gptize /path/to/directory
 ```
+This will process all files in the specified directory and create a report named gptize-output-folder-YYYYMMDD-HHMMSS.txt.
 
-- `path`: Path to the project directory (default is the current directory).
-- `-o, --output`: Path to the output file (default `gptize-output-[timestamp].txt`).
-- `--debug`: Enable debug logging.
-- All args are optional.
+### Specifying a Single File
+For processing a single file:
+```bash
+gptize /path/to/file.txt
+```
+This will process only the specified file and generate a report named gptize-output-file_name-YYYYMMDD-HHMMSS.txt, where file_name is the name of the input file.
+
+## Custom Output File
+If you want to specify a custom output file name, use the -o or --output option:
+```bash
+gptize -o custom_output.txt
+```
+This command will override the default naming convention and use custom_output.txt as the output file name.
 
 ## Uploading to ChatGPT
 After generating the merged file using `gptize`, you can upload it to ChatGPT for improved context understanding. When making requests to ChatGPT, explicitly reference the uploaded file, for instance, using a phrase like `... based on the imported txt file.` `See project file for context` This approach significantly enhances the quality of ChatGPT's responses by providing it with specific context.

@@ -3,12 +3,12 @@ from typing import List
 
 class File:
     """Class representing a file in the project."""
-
     def __init__(self, file_name: str, directory: str):
-        self.file_name: str = file_name
-        self.directory: str = directory
-        self.content: str = ""
-        self.content_size: int = 0
+        self.file_name = file_name
+        self.directory = directory
+        self.content = ""
+        self.content_size = 0
+        self.is_binary = False
 
     def __str__(self):
         return f"File(name={self.file_name}, size={self.content_size} bytes)"

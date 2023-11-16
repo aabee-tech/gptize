@@ -17,9 +17,11 @@ class OutputBuilder:
         self.content += "=" * 40 + "\n"
 
     def write_file_content(self, file: File):
-        """Write the content of a file."""
-        self.content += f"File: {file.directory}\n"
-        self.content += file.content + "\n"
+        if file.is_binary:
+            self.content += f"File: {file.directory} (Binary file present)\n"
+        else:
+            self.content += f"File: {file.directory}\n"
+            self.content += file.content + "\n"
 
     def write_separator(self):
         """Write a separator."""
