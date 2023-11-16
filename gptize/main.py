@@ -9,8 +9,8 @@ def parse_arguments():
     default_output = Settings.default_output_file()
     parser = argparse.ArgumentParser(
         description="Gptize is a tool designed to concatenate the contents of project files into a single text file. It's specifically tailored for creating datasets that can be uploaded into ChatGPT for analysis or training.")
-    parser.add_argument("path", nargs='?', type=str, default=os.getcwd(),
-                        help="Path to the project directory (default: current directory)")
+    parser.add_argument("target", nargs='?', type=str, default=os.getcwd(),
+                        help="Target file or directory to process (default: current directory)")
     parser.add_argument("-o", "--output", type=str, default=default_output,
                         help=f"Output file path (default: {default_output})")
     parser.add_argument("--debug", action="store_true",
@@ -23,8 +23,6 @@ def setup_logging(debug: bool):
     log_format = '%(asctime)s [%(levelname)s]: %(message)s'
     logging.basicConfig(level=log_level, format=log_format)
     if debug:
-        # Logs are generated on standard output only.
-        # The registration handler is added to the file only when debugging mode is enabled.
         logging.getLogger().addHandler(logging.FileHandler('gptize.log'))
 
 
@@ -32,8 +30,20 @@ def main():
     args = parse_arguments()
     setup_logging(args.debug)
 
+    output_file_name = Settings.custom_output_file(
+        args.target)
+    if args.output == Settings.default_output_file():
+        args.output = output_file_name
+
     try:
-        gptizer = GPTizer(args.path)
+        gptizer = GPTizer()
+        if os.path.isdir(args.target):
+            gptizer.process_directory(args.target)
+        elif os.path.isfile(args.target):
+            gptizer.process_file(args.target)
+        else:
+            raise ValueError(f"Invalid target: {args.target}")
+
         combined_content = gptizer.combine_files()
         with open(args.output, 'w', encoding='utf-8') as file:
             file.write(combined_content)
