@@ -135,12 +135,33 @@ class GPTizer:
         file.content_size = len(file.content.encode('utf-8'))
 
     def combine_files(self) -> str:
-        """Combine the content of all files into a single string using OutputBuilder."""
+        """
+        Combine the content of all files into a single string using OutputBuilder,
+        while respecting the size and token count limits.
+        """
         builder = OutputBuilder()
         builder.write_common_header()
         builder.write_project_header(self.project)
 
+        total_size = 0
+        total_tokens = 0
+
         for file in self.project.files:
+            if file.is_binary:
+                continue  # Skip binary files
+
+            file_size = len(file.content.encode('utf-8'))
+            file_tokens = len(file.content.split())  # Simple token count based on whitespace
+
+            if total_size + file_size > Settings.MAX_FILE_SIZE_BYTES_LIMIT:
+                logging.warning("Warning: Combined file size exceeds the maximum limit.")
+
+            if total_tokens + file_tokens > Settings.MAX_TOKEN_COUNT_LIMIT:
+                logging.warning("Warning: Combined token count exceeds the maximum limit.")
+
+            total_size += file_size
+            total_tokens += file_tokens
+
             builder.write_file_content(file)
             builder.write_separator()
 

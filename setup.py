@@ -9,7 +9,7 @@ with open('CHANGELOG.md', 'r', encoding='utf-8') as cl:
 
 setup(
     name='gptize',
-    version='0.2.4',
+    version='0.2.5',
     url='https://github.com/svetlovtech/gptize',
     packages=find_packages(),
     include_package_data=True,
