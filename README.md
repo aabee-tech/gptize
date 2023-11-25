@@ -7,6 +7,7 @@
 - Support for various encodings when reading files.
 - Customizable output file naming based on the input file or directory name.
 - Report generation including all processed files.
+- Enhanced limit checks for file size and token count, with warnings logged instead of errors raised when limits are exceeded.
 
 ## Installation
 To install `gptize`, simply use pip:
