@@ -24,7 +24,7 @@ setup(
     python_requires='>=3.9.0',
     entry_points={
         'console_scripts': [
-            'gptize=gptize.main:main',
+            'gptize=src.main:main',
         ],
     },
     classifiers=[
