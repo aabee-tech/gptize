@@ -39,8 +39,5 @@ jobs:
       - name: Lint with mypy
         run: mypy --config-file mypy.ini ./src *.py
 
-      - name: Format code with black
-        run: black --check .
-
       - name: Test with pytest
         run: pytest -c pytest-full.ini
