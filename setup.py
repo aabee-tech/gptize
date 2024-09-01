@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-import os
 
 with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
@@ -24,7 +23,7 @@ setup(
     python_requires='>=3.9.0',
     entry_points={
         'console_scripts': [
-            'gptize=gptize.main:main',
+            'gptize=src.main:main',
         ],
     },
     classifiers=[

@@ -30,8 +30,7 @@ def main():
     args = parse_arguments()
     setup_logging(args.debug)
 
-    output_file_name = Settings.custom_output_file(
-        args.target)
+    output_file_name = Settings.custom_output_file(args.target)
     if args.output == Settings.default_output_file():
         args.output = output_file_name
 
@@ -50,6 +49,8 @@ def main():
             logging.info(f"Files were combined into {args.output}")
     except FileNotFoundError as e:
         logging.error(f"File not found: {e}")
+    except ValueError as e:
+        logging.error(f"ValueError occurred: {e}")
     except Exception as e:
         logging.error(f"An unexpected error occurred: {e}")
 

@@ -70,16 +70,16 @@ class GPTizer:
         """Load .gitignore patterns for filtering files."""
         gitignore_path = os.path.join(root_path, Settings.GITIGNORE_PATH)
         try:
-            with open(gitignore_path, 'r') as file:
+            with open(gitignore_path, 'r', encoding='utf-8') as file:
                 gitignore = pathspec.PathSpec.from_lines('gitwildmatch', file)
             logging.info(".gitignore loaded")
             return gitignore
         except FileNotFoundError:
-            logging.warning(
-                ".gitignore not found, all files will be processed")
+            logging.warning(".gitignore not found, all files will be processed")
             return pathspec.PathSpec.from_lines('gitwildmatch', [])
         except Exception as e:
             logging.error(f"An unexpected error occurred: {e}")
+            return None
 
     def populate_files(self) -> None:
         """Populate the project with files, excluding those matched by .gitignore and inside ignored directories."""
@@ -87,8 +87,7 @@ class GPTizer:
             dirs[:] = [d for d in dirs if d not in Settings.IGNORED_DIRECTORIES]
             for file_name in files:
                 file_path = os.path.join(root, file_name)
-                relative_path = os.path.relpath(
-                    file_path, self.project.root_path)
+                relative_path = os.path.relpath(file_path, self.project.root_path)
 
                 if self._gitignore.match_file(relative_path):
                     logging.debug(f"File {relative_path} is ignored")
@@ -104,31 +103,29 @@ class GPTizer:
                 if b'\0' in f.read(1024):
                     file.is_binary = True
                     logging.info(f"Binary file detected: {file.file_name}")
-                    return
+                    return None
         except IOError as e:
             logging.error(f"Error reading file {file.directory}: {e}")
-            return
+            return None
 
         for encoding in Settings.DEFAULT_ENCODINGS:
             try:
                 with open(file.directory, 'r', encoding=encoding) as f:
                     file.content = f.read()
                     self.calculate_content_size(file)
-                    logging.info(
-                        f"Content of {file.file_name} loaded with encoding {encoding}")
-                    break
+                    logging.info(f"Content of {file.file_name} loaded with encoding {encoding}")
+                    return None
             except UnicodeDecodeError:
                 continue
             except IOError as e:
                 logging.error(f"Error reading file {file.directory}: {e}")
-                break
+                return None
             except Exception as e:
-                logging.error(
-                    f"An unexpected error occurred while reading {file.file_name}: {e}")
-                break
-        else:
-            logging.error(
-                f"Failed to read {file.file_name} in any known encoding")
+                logging.error(f"An unexpected error occurred while reading {file.file_name}: {e}")
+                return None
+
+        logging.error(f"Failed to read {file.file_name} in any known encoding")
+        return None
 
     def calculate_content_size(self, file: File) -> None:
         """Calculate the size of the content of a file in bytes."""

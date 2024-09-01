@@ -1,0 +1,11 @@
+[flake8]
+ignore=E501
+;     E501, # Lot of lines too long right now
+;     D203, # 1 blank line required before class docstring
+;     E203, W503, # Incompatible with black see https://github.com/ambv/black/issues/315
+
+max-line-length=127
+
+max-complexity=20
+
+exclude = */migrations/*,*/__pycache__/*,*/.venv/*,.git,__pycache__,docs/source/conf.py,old,build,dist
