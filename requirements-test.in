@@ -1,0 +1,10 @@
+-r requirements.txt
+pylint
+flake8
+mypy
+radon
+pytest
+pytest-cov
+vulture
+autopep8
+pydocstyle
