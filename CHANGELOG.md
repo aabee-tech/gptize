@@ -6,9 +6,9 @@
   - Added the `--repo-root` argument to specify the root directory of the repository where the `.gitignore` is located.
   - Example usage: `gptize src/py_module/ --repo-root .` allows processing files in `src/py_module/` while applying `.gitignore` rules from the repository root.
 - [Feature] Added support for a custom .gitignore for GPTize
-  - Now, you can use an additional custom `.gitignore-gptize` file along with the repository root `.gitignore`.
-  - The custom `.gitignore-gptize` can be specified and will be applied in addition to the main `.gitignore`.
-  - Example usage: `gptize src/py_module/ --repo-root .` will apply both `.gitignore` and `.gitignore-gptize`.
+  - Now, you can use an additional custom `.gptignore` file along with the repository root `.gitignore`.
+  - The custom `.gptignore` can be specified and will be applied in addition to the main `.gitignore`.
+  - Example usage: `gptize src/py_module/ --repo-root .` will apply both `.gitignore` and `.gptignore`.
 
 ## [0.2.5] - 2023-11-25
 - [Modification] Updated File Size and Token Count Checks

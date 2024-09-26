@@ -60,7 +60,7 @@ class GPTizer:
         return self._project
 
     def load_gitignore(self, repo_root: str, gptize_ignore: str) -> pathspec.PathSpec:
-        """Load both .gitignore from the repo root and a custom .gitignore-gptize for filtering files."""
+        """Load both .gitignore from the repo root and a custom .gptignore for filtering files."""
         gitignore_path = os.path.join(repo_root, Settings.GITIGNORE_PATH)
         gptize_ignore_path = os.path.join(repo_root, gptize_ignore)
 
@@ -76,15 +76,15 @@ class GPTizer:
         except Exception as e:
             logging.error(f"An unexpected error occurred when loading .gitignore: {e}")
 
-        # Load custom .gitignore-gptize
+        # Load custom .gptignore
         try:
             with open(gptize_ignore_path, 'r', encoding='utf-8') as file:
                 patterns += file.readlines()
-            logging.info(f"Custom .gitignore-gptize loaded from {gptize_ignore_path}")
+            logging.info(f"Custom .gptignore loaded from {gptize_ignore_path}")
         except FileNotFoundError:
-            logging.warning(f"Custom .gitignore-gptize not found at {gptize_ignore_path}, proceeding without it")
+            logging.warning(f"Custom .gptignore not found at {gptize_ignore_path}, proceeding without it")
         except Exception as e:
-            logging.error(f"An unexpected error occurred when loading custom .gitignore-gptize: {e}")
+            logging.error(f"An unexpected error occurred when loading custom .gptignore: {e}")
 
         # Return the combined pathspec
         return pathspec.PathSpec.from_lines('gitwildmatch', patterns)

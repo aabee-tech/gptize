@@ -3,7 +3,7 @@
 **GPTize** is a tool for merging the contents of project files into a single text document. It is specifically designed to create datasets that can be loaded into ChatGPT for analysis or training. I, [Aleksei Svetlov](https://www.linkedin.com/in/svetlovtech/), created this tool because I was tired of copying file contents and paths to make GPT understand the context of my project. With GPTize, this process is now automated and streamlined.
 
 ## Features
-- Exception handling for files based on `.gitignore` (including custom `.gitignore-gptize`).
+- Exception handling for files based on `.gitignore` (including custom `.gptignore`).
 - Support for specifying a target directory with repository root `.gitignore`.
 - Support for various encodings when reading files.
 - Customizable output file naming based on the input file or directory name.
