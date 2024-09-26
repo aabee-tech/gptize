@@ -13,8 +13,8 @@ def parse_arguments():
                         help="Target file or directory to process (default: current directory)")
     parser.add_argument("-o", "--output", type=str, default=default_output,
                         help=f"Output file path (default: {default_output})")
-    parser.add_argument("--ignore", type=str, default='.gitignore-gptize',
-                        help="Custom .gitignore file for gptize (default: .gitignore-gptize)")
+    parser.add_argument("--ignore", type=str, default='.gptignore',
+                        help="Custom .gitignore file for gptize (default: .gptignore)")
     parser.add_argument("--repo-root", type=str, default=os.getcwd(),
                         help="Root directory of the repository where .gitignore is located (default: current directory)")
     parser.add_argument("--debug", action="store_true",
@@ -34,10 +34,6 @@ def main():
     args = parse_arguments()
     setup_logging(args.debug)
 
-    output_file_name = Settings.custom_output_file(args.target)
-    if args.output == Settings.default_output_file():
-        args.output = output_file_name
-
     try:
         gptizer = GPTizer()
         if os.path.isdir(args.target):
@@ -46,7 +42,9 @@ def main():
             gptizer.process_file(args.target, args.repo_root, args.ignore)
         else:
             raise ValueError(f"Invalid target: {args.target}")
-
+        output_file_name = Settings.custom_output_file(gptizer.project.name, args.target)
+        if args.output == Settings.default_output_file():
+            args.output = output_file_name
         combined_content = gptizer.combine_files()
         with open(args.output, 'w', encoding='utf-8') as file:
             file.write(combined_content)

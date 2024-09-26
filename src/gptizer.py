@@ -1,6 +1,7 @@
 import logging
 import os
 import pathspec
+import pyperclip
 from .models import File, Project
 from .settings import Settings
 from .output_builder import OutputBuilder
@@ -60,7 +61,7 @@ class GPTizer:
         return self._project
 
     def load_gitignore(self, repo_root: str, gptize_ignore: str) -> pathspec.PathSpec:
-        """Load both .gitignore from the repo root and a custom .gitignore-gptize for filtering files."""
+        """Load both .gitignore from the repo root and a custom .gptignore for filtering files."""
         gitignore_path = os.path.join(repo_root, Settings.GITIGNORE_PATH)
         gptize_ignore_path = os.path.join(repo_root, gptize_ignore)
 
@@ -76,15 +77,15 @@ class GPTizer:
         except Exception as e:
             logging.error(f"An unexpected error occurred when loading .gitignore: {e}")
 
-        # Load custom .gitignore-gptize
+        # Load custom .gptignore
         try:
             with open(gptize_ignore_path, 'r', encoding='utf-8') as file:
                 patterns += file.readlines()
-            logging.info(f"Custom .gitignore-gptize loaded from {gptize_ignore_path}")
+            logging.info(f"Custom .gptignore loaded from {gptize_ignore_path}")
         except FileNotFoundError:
-            logging.warning(f"Custom .gitignore-gptize not found at {gptize_ignore_path}, proceeding without it")
+            logging.warning(f"Custom .gptignore not found at {gptize_ignore_path}, proceeding without it")
         except Exception as e:
-            logging.error(f"An unexpected error occurred when loading custom .gitignore-gptize: {e}")
+            logging.error(f"An unexpected error occurred when loading custom .gptignore: {e}")
 
         # Return the combined pathspec
         return pathspec.PathSpec.from_lines('gitwildmatch', patterns)
@@ -143,7 +144,10 @@ class GPTizer:
         file.content_size = len(file.content.encode('utf-8'))
 
     def combine_files(self) -> str:
-        """Combine the content of all files into a single string using OutputBuilder."""
+        """
+        Combine the content of all files into a single string using OutputBuilder.
+        Additionally, the result is copied to the clipboard using pyperclip.
+        """
         builder = OutputBuilder()
         builder.write_common_header()
         builder.write_project_header(self.project)
@@ -164,4 +168,9 @@ class GPTizer:
             builder.write_file_content(file)
             builder.write_separator()
 
-        return builder.get_content()
+        combined_content = builder.get_content()
+
+        pyperclip.copy(combined_content)
+        logging.info("Combined content copied to clipboard.")
+
+        return combined_content

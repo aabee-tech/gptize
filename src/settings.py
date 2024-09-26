@@ -11,13 +11,25 @@ class Settings:
 
     @staticmethod
     def default_output_file():
+        """Returns the default output file name with the current date and time."""
         current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
         return f"gptize-output-{current_time}.txt"
 
     @staticmethod
-    def custom_output_file(target: str):
+    def custom_output_file(project_name: str, target: str):
+        """
+        Returns the output file name, including the project name and the current date and time.
+
+        Parameters:
+        project_name (str): The name of the project to be included in the file name.
+        target (str): The target file or directory path.
+        """
         base_name = os.path.basename(target).replace(' ', '_')
         if not base_name or os.path.isdir(target):
             base_name = 'folder' if os.path.isdir(target) else 'file'
+
+        # Use the project name in the output file name if provided
+        project_part = project_name.replace(' ', '_') if project_name else base_name
+
         current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
-        return f"gptize-output-{base_name}-{current_time}.txt"
+        return f"gptize-output-{project_part}-{current_time}.txt"

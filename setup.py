@@ -8,7 +8,7 @@ with open('CHANGELOG.md', 'r', encoding='utf-8') as cl:
 
 setup(
     name='gptize',
-    version='0.3.2',
+    version='0.4.0',
     url='https://github.com/aabee-tech/gptize',
     packages=find_packages(),
     include_package_data=True,

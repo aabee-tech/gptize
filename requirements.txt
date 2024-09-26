@@ -52,6 +52,8 @@ pygments==2.18.0
     # via
     #   readme-renderer
     #   rich
+pyperclip==1.9.0
+    # via -r requirements.in
 readme-renderer==44.0
     # via twine
 requests==2.32.3
