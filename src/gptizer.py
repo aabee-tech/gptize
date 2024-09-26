@@ -11,51 +11,41 @@ class GPTizer:
         self._project = None
         self._gitignore = None
 
-    def process_directory(self, root_path: str):
+    def process_directory(self, target_path: str, repo_root: str, gptize_ignore: str):
         """
         Processes all the files within a given directory. This method initializes
-        the Project object for the specified directory, loads the .gitignore patterns,
-        and populates the project with files that are not ignored by .gitignore.
-
-        The method traverses through the directory recursively and adds all relevant
-        files to the project's file list, ensuring that binary files and files
-        specified in .gitignore are not included.
+        the Project object for the specified directory, loads the .gitignore patterns
+        from the repository root, and populates the project with files that are not
+        ignored by .gitignore.
 
         Parameters:
-        root_path (str): The path to the root of the directory to be processed.
+        target_path (str): The path to the directory that should be processed.
+        repo_root (str): The root path of the repository where the .gitignore is located.
+        gptize_ignore (str): Path to the second .gitignore file for gptize.
 
         Raises:
         FileNotFoundError: If the specified directory does not exist.
-        Exception: For any other issues encountered during the directory processing.
         """
-        project_name = os.path.basename(root_path)
-        self._project = Project(project_name, root_path)
-        self._gitignore = self.load_gitignore(root_path)
+        project_name = os.path.basename(target_path)
+        self._project = Project(project_name, target_path)
+        self._gitignore = self.load_gitignore(repo_root, gptize_ignore)
         self.populate_files()
 
-    def process_file(self, file_path: str):
+    def process_file(self, file_path: str, repo_root: str, gptize_ignore: str):
         """
         Processes a single file. This method creates a Project object for the file,
-        treating the file as an individual project. It bypasses .gitignore processing,
-        as it is assumed that the specific file is intentionally selected for processing.
-
-        The method creates a File object for the specified file, reads its content,
-        and adds it to the project's file list. It handles binary and text files
-        accordingly.
+        treating the file as an individual project. It loads .gitignore from the
+        repository root to determine which files to ignore.
 
         Parameters:
-        file_path (str): The path to the file to be processed. This includes both
-        the directory path and file name.
-
-        Raises:
-        FileNotFoundError: If the specified file does not exist.
-        IOError: If there is an issue reading the file.
-        Exception: For any other unexpected issues encountered during file processing.
+        file_path (str): The path to the file to be processed.
+        repo_root (str): The root path of the repository where the .gitignore is located.
+        gptize_ignore (str): Path to the second .gitignore file for gptize.
         """
         root_path, file_name = os.path.split(file_path)
         project_name = os.path.basename(root_path) if root_path else 'SingleFileProject'
         self._project = Project(project_name, root_path or '.')
-        self._gitignore = pathspec.PathSpec.from_lines('gitwildmatch', [])
+        self._gitignore = self.load_gitignore(repo_root, gptize_ignore)
 
         file_obj = File(file_name, file_path)
         self.load_file_content(file_obj)
@@ -64,22 +54,40 @@ class GPTizer:
     @property
     def project(self) -> Project:
         """Property to access the project object."""
+        if self._project is None:
+            logging.error("Project has not been initialized.")
+            raise AttributeError("Project has not been initialized.")
         return self._project
 
-    def load_gitignore(self, root_path: str) -> pathspec.PathSpec:
-        """Load .gitignore patterns for filtering files."""
-        gitignore_path = os.path.join(root_path, Settings.GITIGNORE_PATH)
+    def load_gitignore(self, repo_root: str, gptize_ignore: str) -> pathspec.PathSpec:
+        """Load both .gitignore from the repo root and a custom .gitignore-gptize for filtering files."""
+        gitignore_path = os.path.join(repo_root, Settings.GITIGNORE_PATH)
+        gptize_ignore_path = os.path.join(repo_root, gptize_ignore)
+
+        patterns = []
+
+        # Load .gitignore from repo root
         try:
             with open(gitignore_path, 'r', encoding='utf-8') as file:
-                gitignore = pathspec.PathSpec.from_lines('gitwildmatch', file)
-            logging.info(".gitignore loaded")
-            return gitignore
+                patterns += file.readlines()
+            logging.info(f".gitignore loaded from {gitignore_path}")
         except FileNotFoundError:
-            logging.warning(".gitignore not found, all files will be processed")
-            return pathspec.PathSpec.from_lines('gitwildmatch', [])
+            logging.warning(f".gitignore not found at {gitignore_path}, proceeding without it")
         except Exception as e:
-            logging.error(f"An unexpected error occurred: {e}")
-            return None
+            logging.error(f"An unexpected error occurred when loading .gitignore: {e}")
+
+        # Load custom .gitignore-gptize
+        try:
+            with open(gptize_ignore_path, 'r', encoding='utf-8') as file:
+                patterns += file.readlines()
+            logging.info(f"Custom .gitignore-gptize loaded from {gptize_ignore_path}")
+        except FileNotFoundError:
+            logging.warning(f"Custom .gitignore-gptize not found at {gptize_ignore_path}, proceeding without it")
+        except Exception as e:
+            logging.error(f"An unexpected error occurred when loading custom .gitignore-gptize: {e}")
+
+        # Return the combined pathspec
+        return pathspec.PathSpec.from_lines('gitwildmatch', patterns)
 
     def populate_files(self) -> None:
         """Populate the project with files, excluding those matched by .gitignore and inside ignored directories."""
@@ -87,17 +95,20 @@ class GPTizer:
             dirs[:] = [d for d in dirs if d not in Settings.IGNORED_DIRECTORIES]
             for file_name in files:
                 file_path = os.path.join(root, file_name)
+
+                # Use the full path relative to the project root directory, not the current working directory
                 relative_path = os.path.relpath(file_path, self.project.root_path)
 
                 if self._gitignore.match_file(relative_path):
                     logging.debug(f"File {relative_path} is ignored")
                     continue
 
-                file_obj = File(file_name, relative_path)
+                file_obj = File(file_name, file_path)
                 self.load_file_content(file_obj)
                 self.project.files.append(file_obj)
 
     def load_file_content(self, file: File) -> None:
+        """Load content from a file and detect binary files."""
         try:
             with open(file.directory, 'rb') as f:
                 if b'\0' in f.read(1024):
@@ -132,10 +143,7 @@ class GPTizer:
         file.content_size = len(file.content.encode('utf-8'))
 
     def combine_files(self) -> str:
-        """
-        Combine the content of all files into a single string using OutputBuilder,
-        while respecting the size and token count limits.
-        """
+        """Combine the content of all files into a single string using OutputBuilder."""
         builder = OutputBuilder()
         builder.write_common_header()
         builder.write_project_header(self.project)
@@ -149,12 +157,6 @@ class GPTizer:
 
             file_size = len(file.content.encode('utf-8'))
             file_tokens = len(file.content.split())  # Simple token count based on whitespace
-
-            if total_size + file_size > Settings.MAX_FILE_SIZE_BYTES_LIMIT:
-                logging.warning("Warning: Combined file size exceeds the maximum limit.")
-
-            if total_tokens + file_tokens > Settings.MAX_TOKEN_COUNT_LIMIT:
-                logging.warning("Warning: Combined token count exceeds the maximum limit.")
 
             total_size += file_size
             total_tokens += file_tokens

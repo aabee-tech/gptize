@@ -13,6 +13,10 @@ def parse_arguments():
                         help="Target file or directory to process (default: current directory)")
     parser.add_argument("-o", "--output", type=str, default=default_output,
                         help=f"Output file path (default: {default_output})")
+    parser.add_argument("--ignore", type=str, default='.gitignore-gptize',
+                        help="Custom .gitignore file for gptize (default: .gitignore-gptize)")
+    parser.add_argument("--repo-root", type=str, default=os.getcwd(),
+                        help="Root directory of the repository where .gitignore is located (default: current directory)")
     parser.add_argument("--debug", action="store_true",
                         help="Enable debug logging (saves to gptize.log in the current directory)")
     return parser.parse_args()
@@ -37,9 +41,9 @@ def main():
     try:
         gptizer = GPTizer()
         if os.path.isdir(args.target):
-            gptizer.process_directory(args.target)
+            gptizer.process_directory(args.target, args.repo_root, args.ignore)
         elif os.path.isfile(args.target):
-            gptizer.process_file(args.target)
+            gptizer.process_file(args.target, args.repo_root, args.ignore)
         else:
             raise ValueError(f"Invalid target: {args.target}")
 

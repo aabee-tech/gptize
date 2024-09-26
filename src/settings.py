@@ -16,8 +16,7 @@ class Settings:
 
     @staticmethod
     def custom_output_file(target: str):
-        base_name = os.path.basename(target).replace(
-            ' ', '_')
+        base_name = os.path.basename(target).replace(' ', '_')
         if not base_name or os.path.isdir(target):
             base_name = 'folder' if os.path.isdir(target) else 'file'
         current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
