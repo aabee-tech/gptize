@@ -8,12 +8,13 @@ with open('CHANGELOG.md', 'r', encoding='utf-8') as cl:
 
 setup(
     name='gptize',
-    version='0.4.0',
+    version='0.4.1',
     url='https://github.com/aabee-tech/gptize',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
         'pathspec==0.11.2',
+        'pyperclip==1.9.0',
     ],
     author='SvetlovTech',
     author_email='svetlovtech@aabee.tech',
