@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 
+
 class Settings:
     DEFAULT_ENCODINGS = ['utf-8', 'latin-1', 'cp1252']
     IGNORED_DIRECTORIES = ['.git', '.svn', '__pycache__']
