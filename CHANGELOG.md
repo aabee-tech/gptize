@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [0.4.0] - 2024-09-27
+- [Feature] Added clipboard copy functionality
+  - The combined output file content is now automatically copied to the clipboard using `pyperclip` after the content is generated.
+- [Enhancement] Improved output file naming
+  - Output file names now include the project name in addition to the date and time. This provides better traceability for output files.
+- [Enhancement] Updated `Settings.custom_output_file`
+  - The method now accepts the project name as an argument and uses it in the output file name.
+- [Enhancement] Reorganized the main logic in `main.py`
+  - Fixed a bug where the `gptizer` object was used before initialization.
+  - Ensured that output file name generation happens after `gptizer` is properly initialized.
+
 ## [0.3.0] - 2024-09-26
 - [Feature] Support for specifying a target directory with repository root .gitignore
   - Now `gptize` can be executed from any directory, while still applying `.gitignore` rules from the root of the repository.
