@@ -8,7 +8,7 @@ with open('CHANGELOG.md', 'r', encoding='utf-8') as cl:
 
 setup(
     name='gptize',
-    version='0.2.5',
+    version='0.3.0',
     url='https://github.com/svetlovtech/gptize',
     packages=find_packages(),
     include_package_data=True,
@@ -16,7 +16,7 @@ setup(
         'pathspec==0.11.2',
     ],
     author='SvetlovTech',
-    author_email='alexeysvetlov92@gmail.com',
+    author_email='svetlovtech@aabee.tech',
     description='Gptize is a tool designed to concatenate the contents of project files for ChatGPT',
     long_description=long_description + '\n\n' + changelog,
     long_description_content_type='text/markdown',
