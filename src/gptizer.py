@@ -177,25 +177,34 @@ class GPTizer:
         """
         Summarize total tokens, lines, characters, and percentage of context usage.
         """
-        total_lines = sum(f.line_count for f in self.project.files if hasattr(f, 'line_count'))
-        total_tokens = sum(f.token_count for f in self.project.files if hasattr(f, 'token_count'))
-        total_chars = sum(f.char_count for f in self.project.files if hasattr(f, 'char_count'))
+        total_chars = 0
+        for file in self.project.files:
+            total_chars += file.stats.char_count
+        total_lines = 0
+        for file in self.project.files:
+            total_lines += file.stats.line_count
+        total_tokens = 0
+        for file in self.project.files:
+            total_tokens += file.stats.token_count
         max_context = Settings.GPT4O_CONTEXT_WINDOW
 
-        files_by_tokens = sorted(
-            (f for f in self.project.files if hasattr(f, 'token_count') and f.token_count > 0),
-            key=lambda x: x.token_count,
-            reverse=True
-        )
-        top_files = files_by_tokens[:Settings.TOP_TOKEN_FILES_COUNT]
+        files_with_tokens = []
+        for f in self.project.files:
+            if hasattr(f, 'stats'):
+                file_stats = f.stats
+                if hasattr(file_stats, 'token_count') and file_stats.token_count > 0:
+                    files_with_tokens.append(f)
+
+        files_with_tokens.sort(key=lambda x: x.stats.token_count, reverse=True)
+        top_by_token_files = files_with_tokens[:Settings.TOP_TOKEN_FILES_COUNT]
 
         logging.info(f"Top {Settings.TOP_TOKEN_FILES_COUNT} files by token count:")
-        for i, file in enumerate(top_files, start=1):
-            token_percentage = (file.token_count / max_context) * 100 if total_tokens > 0 else 0
+        for i, file in enumerate(top_by_token_files, start=1):
+            token_percentage = (file.stats.token_count / max_context) * 100 if total_tokens > 0 else 0
             logging.info(
-                f"{i}. {file.file_name} - {file.token_count} tokens "
+                f"{str(i).zfill(2)}. {file.file_name} - {file.stats.token_count} tokens "
                 f"({token_percentage:.2f}% of context), "
-                f"{file.line_count} lines, {file.char_count} characters"
+                f"{file.stats.line_count} lines, {file.stats.char_count} characters"
             )
 
         logging.info(f"Total lines: {total_lines}")
