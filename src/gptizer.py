@@ -142,18 +142,18 @@ class GPTizer:
                     file.content = ''.join(lines)
                     self.calculate_content_size(file)
 
-                    file.line_count = len(lines)
-                    file.char_count = len(file.content)
+                    file.stats.line_count = len(lines)
+                    file.stats.char_count = len(file.content)
 
                     if self.encoder:
-                        file.token_count = len(self.encoder.encode(file.content))
+                        file.stats.token_count = len(self.encoder.encode(file.content))
                     else:
-                        file.token_count = 0
+                        file.stats.token_count = 0
 
                     if len(lines) > Settings.WARN_LINES_COUNT:
                         logging.warning(f"File {relative_path} exceeds 700 lines ({len(lines)} lines).")
                     logging.info(f"Content of {relative_path} loaded with encoding {encoding}")
-                    logging.info(f"File {relative_path}: {file.line_count} lines, {file.char_count} characters, {file.token_count} tokens.")
+                    logging.info(f"File {relative_path}: {file.stats.line_count} lines, {file.stats.char_count} characters, {file.stats.token_count} tokens.")
                     return None
             except UnicodeDecodeError:
                 continue
