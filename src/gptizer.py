@@ -1,9 +1,9 @@
+import os
 import subprocess
 import logging
-import os
+from datetime import datetime
 import pathspec
 import pyperclip
-from datetime import datetime
 from .models import File, Project
 from .settings import Settings
 from .output_builder import OutputBuilder
