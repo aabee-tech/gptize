@@ -8,6 +8,8 @@ class FileMetadata:
         self.size = size
         self.last_modified = last_modified
         self.permissions = permissions
+        self.lines = 0
+        self.tokens = 0
 
 
 class File:
