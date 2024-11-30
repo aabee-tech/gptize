@@ -124,7 +124,7 @@ class GPTizer:
                     lines = f.readlines()
                     file.content = ''.join(lines)
                     self.calculate_content_size(file)
-                    if len(lines) > 700:
+                    if len(lines) > Settings.WARN_LINES_COUNT:
                         logging.warning(f"File {relative_path} exceeds 700 lines ({len(lines)} lines).")
                     logging.info(f"Content of {relative_path} loaded with encoding {encoding}")
                     return None
