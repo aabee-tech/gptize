@@ -182,6 +182,22 @@ class GPTizer:
         total_chars = sum(f.char_count for f in self.project.files if hasattr(f, 'char_count'))
         max_context = Settings.GPT4O_CONTEXT_WINDOW
 
+        files_by_tokens = sorted(
+            (f for f in self.project.files if hasattr(f, 'token_count') and f.token_count > 0),
+            key=lambda x: x.token_count,
+            reverse=True
+        )
+        top_files = files_by_tokens[:Settings.TOP_TOKEN_FILES_COUNT]
+
+        logging.info(f"Top {Settings.TOP_TOKEN_FILES_COUNT} files by token count:")
+        for i, file in enumerate(top_files, start=1):
+            token_percentage = (file.token_count / max_context) * 100 if total_tokens > 0 else 0
+            logging.info(
+                f"{i}. {file.file_name} - {file.token_count} tokens "
+                f"({token_percentage:.2f}% of context), "
+                f"{file.line_count} lines, {file.char_count} characters"
+            )
+
         logging.info(f"Total lines: {total_lines}")
         logging.info(f"Total tokens: {total_tokens}")
         logging.info(f"Total characters: {total_chars}")

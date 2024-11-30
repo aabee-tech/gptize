@@ -11,6 +11,7 @@ class Settings:
     WARN_LINES_COUNT = 700
     GPT4O_CONTEXT_WINDOW = 128000  # Token context window for GPT-4o
     TOKEN_MODEL_NAME = 'o200k_base'
+    TOP_TOKEN_FILES_COUNT = 10
 
     @staticmethod
     def default_output_file():
