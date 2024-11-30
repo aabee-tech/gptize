@@ -101,9 +101,9 @@ class GPTizer:
                 file_obj = File(file_name, file_path)
                 try:
                     stat = os.stat(file_path)
-                    file_obj.size = stat.st_size
-                    file_obj.last_modified = datetime.fromtimestamp(stat.st_mtime).isoformat()
-                    file_obj.permissions = oct(stat.st_mode)[-3:]
+                    file_obj.metadata.size = stat.st_size
+                    file_obj.metadata.last_modified = datetime.fromtimestamp(stat.st_mtime).isoformat()
+                    file_obj.metadata.permissions = oct(stat.st_mode)[-3:]
                 except Exception as e:
                     logging.error(f"Failed to retrieve metadata for {file_path}: {e}")
                 self.load_file_content(file_obj)

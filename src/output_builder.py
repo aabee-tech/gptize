@@ -28,9 +28,9 @@ class OutputBuilder:
             self.content += f"File: {file.directory} (Binary file present)\n"
         else:
             self.content += f"File: {file.directory}\n"
-            self.content += f"Size: {file.size} bytes\n"
-            self.content += f"Last Modified: {file.last_modified}\n"
-            self.content += f"Permissions: {file.permissions}\n"
+            self.content += f"Size: {file.metadata.size} bytes\n"
+            self.content += f"Last Modified: {file.metadata.last_modified}\n"
+            self.content += f"Permissions: {file.metadata.permissions}\n"
             self.content += file.content + "\n"
 
     def write_separator(self):
