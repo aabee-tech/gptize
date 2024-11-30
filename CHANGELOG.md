@@ -1,5 +1,40 @@
 # CHANGELOG
 
+## [0.5.0] - 2024-12-01
+- [Feature] Added support for tokenization using `tiktoken`
+  - Integrated `tiktoken` for accurate token counting.
+  - Introduced new tokenization settings in `Settings` class, including `TOKEN_MODEL_NAME`, `GPT4O_CONTEXT_WINDOW`, and `TOP_TOKEN_FILES_COUNT`.
+
+- [Feature] Git status integration
+  - Added functionality to include Git branch, last commit, and file status in the combined output.
+
+- [Feature] Custom `.gptignore` support
+  - Implemented a `.gptignore` file to specify additional patterns for file exclusion alongside `.gitignore`.
+
+- [Enhancement] Expanded Python version support
+  - Updated GitHub Actions CI to include testing on Python 3.13.
+
+- [Enhancement] Metadata and statistics for processed files
+  - File metadata now includes size, last modified timestamp, and permissions.
+  - Statistics for line count, character count, and token count added for each file.
+  - Enhanced logging to display detailed file statistics and warnings for files exceeding predefined limits.
+
+- [Enhancement] Detailed statistics summary
+  - Added summary for total lines, tokens, and characters, along with the percentage of GPT-4o context usage.
+
+- [Enhancement] Clipboard support improvements
+  - Enhanced compatibility for clipboard operations, including fallback to `xclip` if default tools are unavailable.
+
+- [Refactor] Cleaned up code and improved maintainability
+  - Simplified method parameters and removed redundant comments.
+  - Introduced `FileStats` and `FileMetadata` classes for structured storage of file-related data.
+
+- [Fix] Updated requirements
+  - Added `tiktoken` and its dependencies to `requirements.in` and `requirements.txt`.
+
+- [Fix] Enhanced error handling
+  - Improved error messages and handling for file reading, Git commands, and clipboard operations.
+
 ## [0.4.0] - 2024-09-27
 - [Feature] Added clipboard copy functionality
   - The combined output file content is now automatically copied to the clipboard using `pyperclip` after the content is generated.

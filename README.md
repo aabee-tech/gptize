@@ -1,3 +1,4 @@
+
 # GPTize
 
 **GPTize** is a tool for merging the contents of project files into a single text document. It is specifically designed to create datasets that can be loaded into ChatGPT for analysis or training. I, [Aleksei Svetlov](https://www.linkedin.com/in/svetlovtech/), created this tool because I was tired of copying file contents and paths to make GPT understand the context of my project. With GPTize, this process is now automated and streamlined.
@@ -11,6 +12,10 @@
 - **Customizable output file naming** based on the input file or directory name.
 - **Report generation including all processed files**.
 - **Enhanced limit checks for file size and token count**, with warnings logged instead of errors raised when limits are exceeded.
+- **Detailed Git integration**: Includes the current branch, last commit, and file status in the generated report.
+- **Tokenization support**: Integrated with `tiktoken` for accurate token counting and analysis.
+- **File statistics**: Provides detailed information on line count, character count, token count, file size, last modified date, and permissions for every processed file.
+- **Warnings for large files**: Alerts if files exceed a predefined line count threshold.
 
 ## Installation
 To install GPTize, simply use pip:
@@ -71,6 +76,18 @@ This command will override the default naming convention and use `custom_output.
 
 ### Uploading to ChatGPT
 After generating the merged file using GPTize, you can upload it to ChatGPT for improved context understanding. When making requests to ChatGPT, explicitly reference the uploaded file, for instance, using a phrase like `... based on the imported txt file.` This approach significantly enhances the quality of ChatGPT's responses by providing it with specific context.
+
+### Analyzing Statistics
+GPTize provides detailed statistics for all processed files:
+- Line count, character count, and token count.
+- Total project statistics including total lines, tokens, and percentage of GPT-4o context usage.
+- Warnings for files exceeding predefined line count thresholds.
+
+### Git Integration
+The generated report includes Git details such as:
+- Current branch.
+- Last commit message, author, and timestamp.
+- Untracked or modified files.
 
 ## Components
 - `gptizer.py`: The main class for file processing.
