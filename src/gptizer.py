@@ -170,7 +170,20 @@ class GPTizer:
 
         combined_content = builder.get_content()
 
-        pyperclip.copy(combined_content)
-        logging.info("Combined content copied to clipboard.")
+        try:
+            pyperclip.copy(combined_content)
+        except FileNotFoundError:
+            logging.warning(
+                "Clipboard tool 'clip.exe' not found."
+            )
+            try:
+                logging.info("Attempting to use 'xclip' as the clipboard tool.")
+                pyperclip.set_clipboard("xclip")
+                pyperclip.copy(combined_content)
+            except Exception:
+                logging.warning(
+                    "Failed to copy content to clipboard even with 'xclip'"
+                )
 
+        logging.info("Processing completed.")
         return combined_content
