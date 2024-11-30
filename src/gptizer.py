@@ -1,8 +1,8 @@
+import subprocess
 import logging
 import os
 import pathspec
 import pyperclip
-import subprocess
 from .models import File, Project
 from .settings import Settings
 from .output_builder import OutputBuilder
@@ -149,27 +149,33 @@ class GPTizer:
                 ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
                 capture_output=True,
                 text=True,
-                cwd=self.project.root_path
+                cwd=self.project.root_path,
+                check=True
             )
-            branch = branch_result.stdout.strip() if branch_result.returncode == 0 else "Unknown branch"
+            branch = branch_result.stdout.strip()
 
             last_commit_result = subprocess.run(
                 ['git', 'log', '-1', '--pretty=format:%H - %s (%an, %ar)'],
                 capture_output=True,
                 text=True,
-                cwd=self.project.root_path
+                cwd=self.project.root_path,
+                check=True
             )
-            last_commit = last_commit_result.stdout.strip() if last_commit_result.returncode == 0 else "No commit info"
+            last_commit = last_commit_result.stdout.strip()
 
             status_result = subprocess.run(
                 ['git', 'status', '--short'],
                 capture_output=True,
                 text=True,
-                cwd=self.project.root_path
+                cwd=self.project.root_path,
+                check=True
             )
-            status = status_result.stdout.strip() if status_result.returncode == 0 else "No status info"
+            status = status_result.stdout.strip()
 
             return f"Branch: {branch}\nLast Commit: {last_commit}\n\nGit Status:\n{status}"
+        except subprocess.CalledProcessError as e:
+            logging.warning(f"Git command failed: {e}")
+            return "Git information not available."
         except Exception as e:
             logging.warning(f"Could not fetch git details: {e}")
             return "Git information not available."
