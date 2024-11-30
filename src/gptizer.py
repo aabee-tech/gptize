@@ -1,6 +1,7 @@
+import os
 import subprocess
 import logging
-import os
+from datetime import datetime
 import pathspec
 import pyperclip
 from .models import File, Project
@@ -98,6 +99,13 @@ class GPTizer:
                     continue
 
                 file_obj = File(file_name, file_path)
+                try:
+                    stat = os.stat(file_path)
+                    file_obj.metadata.size = stat.st_size
+                    file_obj.metadata.last_modified = datetime.fromtimestamp(stat.st_mtime).isoformat()
+                    file_obj.metadata.permissions = oct(stat.st_mode)[-3:]
+                except Exception as e:
+                    logging.error(f"Failed to retrieve metadata for {file_path}: {e}")
                 self.load_file_content(file_obj)
                 self.project.files.append(file_obj)
 

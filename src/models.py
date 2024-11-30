@@ -1,17 +1,28 @@
 from typing import List
 
 
+class FileMetadata:
+    """Class representing a file metadata in the project."""
+
+    def __init__(self, size=0, last_modified=None, permissions=None):
+        self.size = size
+        self.last_modified = last_modified
+        self.permissions = permissions
+
+
 class File:
     """Class representing a file in the project."""
+
     def __init__(self, file_name: str, directory: str):
         self.file_name = file_name
         self.directory = directory
         self.content = ""
         self.content_size = 0
         self.is_binary = False
+        self.metadata = FileMetadata()
 
     def __str__(self):
-        return f"File(name={self.file_name}, size={self.content_size} bytes)"
+        return f"File(name={self.file_name}, size={self.metadata.size} bytes, modified={self.metadata.last_modified})"
 
     def __repr__(self):
         return f"<File '{self.file_name}' at {self.directory}>"
