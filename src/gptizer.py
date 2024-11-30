@@ -2,6 +2,7 @@ import logging
 import os
 import pathspec
 import pyperclip
+import subprocess
 from .models import File, Project
 from .settings import Settings
 from .output_builder import OutputBuilder
@@ -18,14 +19,6 @@ class GPTizer:
         the Project object for the specified directory, loads the .gitignore patterns
         from the repository root, and populates the project with files that are not
         ignored by .gitignore.
-
-        Parameters:
-        target_path (str): The path to the directory that should be processed.
-        repo_root (str): The root path of the repository where the .gitignore is located.
-        gptize_ignore (str): Path to the second .gitignore file for gptize.
-
-        Raises:
-        FileNotFoundError: If the specified directory does not exist.
         """
         project_name = os.path.basename(target_path)
         self._project = Project(project_name, target_path)
@@ -37,11 +30,6 @@ class GPTizer:
         Processes a single file. This method creates a Project object for the file,
         treating the file as an individual project. It loads .gitignore from the
         repository root to determine which files to ignore.
-
-        Parameters:
-        file_path (str): The path to the file to be processed.
-        repo_root (str): The root path of the repository where the .gitignore is located.
-        gptize_ignore (str): Path to the second .gitignore file for gptize.
         """
         root_path, file_name = os.path.split(file_path)
         project_name = os.path.basename(root_path) if root_path else 'SingleFileProject'
@@ -54,14 +42,18 @@ class GPTizer:
 
     @property
     def project(self) -> Project:
-        """Property to access the project object."""
+        """
+        Property to access the project object.
+        """
         if self._project is None:
             logging.error("Project has not been initialized.")
             raise AttributeError("Project has not been initialized.")
         return self._project
 
     def load_gitignore(self, repo_root: str, gptize_ignore: str) -> pathspec.PathSpec:
-        """Load both .gitignore from the repo root and a custom .gptignore for filtering files."""
+        """
+        Load both .gitignore from the repo root and a custom .gptignore for filtering files.
+        """
         gitignore_path = os.path.join(repo_root, Settings.GITIGNORE_PATH)
         gptize_ignore_path = os.path.join(repo_root, gptize_ignore)
 
@@ -87,11 +79,12 @@ class GPTizer:
         except Exception as e:
             logging.error(f"An unexpected error occurred when loading custom .gptignore: {e}")
 
-        # Return the combined pathspec
         return pathspec.PathSpec.from_lines('gitwildmatch', patterns)
 
     def populate_files(self) -> None:
-        """Populate the project with files, excluding those matched by .gitignore and inside ignored directories."""
+        """
+        Populate the project with files, excluding those matched by .gitignore and inside ignored directories.
+        """
         for root, dirs, files in os.walk(self.project.root_path):
             dirs[:] = [d for d in dirs if d not in Settings.IGNORED_DIRECTORIES]
             for file_name in files:
@@ -109,7 +102,9 @@ class GPTizer:
                 self.project.files.append(file_obj)
 
     def load_file_content(self, file: File) -> None:
-        """Load content from a file and detect binary files."""
+        """
+        Load content from a file and detect binary files.
+        """
         try:
             with open(file.directory, 'rb') as f:
                 if b'\0' in f.read(1024):
@@ -140,17 +135,57 @@ class GPTizer:
         return None
 
     def calculate_content_size(self, file: File) -> None:
-        """Calculate the size of the content of a file in bytes."""
+        """
+        Calculate the size of the content of a file in bytes.
+        """
         file.content_size = len(file.content.encode('utf-8'))
+
+    def get_git_status(self):
+        """
+        Fetch detailed git status for the project directory.
+        """
+        try:
+            branch_result = subprocess.run(
+                ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                capture_output=True,
+                text=True,
+                cwd=self.project.root_path
+            )
+            branch = branch_result.stdout.strip() if branch_result.returncode == 0 else "Unknown branch"
+
+            last_commit_result = subprocess.run(
+                ['git', 'log', '-1', '--pretty=format:%H - %s (%an, %ar)'],
+                capture_output=True,
+                text=True,
+                cwd=self.project.root_path
+            )
+            last_commit = last_commit_result.stdout.strip() if last_commit_result.returncode == 0 else "No commit info"
+
+            status_result = subprocess.run(
+                ['git', 'status', '--short'],
+                capture_output=True,
+                text=True,
+                cwd=self.project.root_path
+            )
+            status = status_result.stdout.strip() if status_result.returncode == 0 else "No status info"
+
+            return f"Branch: {branch}\nLast Commit: {last_commit}\n\nGit Status:\n{status}"
+        except Exception as e:
+            logging.warning(f"Could not fetch git details: {e}")
+            return "Git information not available."
+
 
     def combine_files(self) -> str:
         """
         Combine the content of all files into a single string using OutputBuilder.
-        Additionally, the result is copied to the clipboard using pyperclip.
         """
         builder = OutputBuilder()
         builder.write_common_header()
         builder.write_project_header(self.project)
+
+        git_status = self.get_git_status()
+        if git_status:
+            builder.write_git_status(git_status)
 
         total_size = 0
         total_tokens = 0
@@ -160,7 +195,7 @@ class GPTizer:
                 continue  # Skip binary files
 
             file_size = len(file.content.encode('utf-8'))
-            file_tokens = len(file.content.split())  # Simple token count based on whitespace
+            file_tokens = len(file.content.split())
 
             total_size += file_size
             total_tokens += file_tokens
@@ -173,17 +208,13 @@ class GPTizer:
         try:
             pyperclip.copy(combined_content)
         except FileNotFoundError:
-            logging.warning(
-                "Clipboard tool 'clip.exe' not found."
-            )
+            logging.warning("Clipboard tool 'clip.exe' not found.")
             try:
                 logging.info("Attempting to use 'xclip' as the clipboard tool.")
                 pyperclip.set_clipboard("xclip")
                 pyperclip.copy(combined_content)
             except Exception:
-                logging.warning(
-                    "Failed to copy content to clipboard even with 'xclip'"
-                )
+                logging.warning("Failed to copy content to clipboard even with 'xclip'")
 
         logging.info("Processing completed.")
         return combined_content
