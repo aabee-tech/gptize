@@ -16,11 +16,21 @@ class OutputBuilder:
         self.content += f"Total Files: {len(project.files)}\n"
         self.content += "=" * 40 + "\n"
 
+    def write_git_status(self, git_status: str):
+        """Write git status to the content."""
+        self.content += "Git Status:\n"
+        self.content += git_status + "\n"
+        self.content += "=" * 40 + "\n"
+
     def write_file_content(self, file: File):
+        """Write the content of a file."""
         if file.is_binary:
             self.content += f"File: {file.directory} (Binary file present)\n"
         else:
             self.content += f"File: {file.directory}\n"
+            self.content += f"Size: {file.metadata.size} bytes\n"
+            self.content += f"Last Modified: {file.metadata.last_modified}\n"
+            self.content += f"Permissions: {file.metadata.permissions}\n"
             self.content += file.content + "\n"
 
     def write_separator(self):

@@ -8,6 +8,10 @@ class Settings:
     GITIGNORE_PATH = '.gitignore'
     MAX_FILE_SIZE_BYTES_LIMIT = 512 * 1024 * 1024  # 512 MB
     MAX_TOKEN_COUNT_LIMIT = 2000000  # 2 million tokens
+    WARN_LINES_COUNT = 700
+    GPT4O_CONTEXT_WINDOW = 128000  # Token context window for GPT-4o
+    TOKEN_MODEL_NAME = 'o200k_base'
+    TOP_TOKEN_FILES_COUNT = 10
 
     @staticmethod
     def default_output_file():
