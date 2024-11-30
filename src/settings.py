@@ -8,6 +8,7 @@ class Settings:
     GITIGNORE_PATH = '.gitignore'
     MAX_FILE_SIZE_BYTES_LIMIT = 512 * 1024 * 1024  # 512 MB
     MAX_TOKEN_COUNT_LIMIT = 2000000  # 2 million tokens
+    WARN_LINES_COUNT = 700
 
     @staticmethod
     def default_output_file():
