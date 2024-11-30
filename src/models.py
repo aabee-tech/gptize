@@ -3,15 +3,19 @@ from typing import List
 
 class File:
     """Class representing a file in the project."""
+
     def __init__(self, file_name: str, directory: str):
         self.file_name = file_name
         self.directory = directory
         self.content = ""
         self.content_size = 0
         self.is_binary = False
+        self.size = 0
+        self.last_modified = None
+        self.permissions = None
 
     def __str__(self):
-        return f"File(name={self.file_name}, size={self.content_size} bytes)"
+        return f"File(name={self.file_name}, size={self.size} bytes, modified={self.last_modified})"
 
     def __repr__(self):
         return f"<File '{self.file_name}' at {self.directory}>"
