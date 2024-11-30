@@ -8,6 +8,17 @@ class FileMetadata:
         self.size = size
         self.last_modified = last_modified
         self.permissions = permissions
+        self.lines = 0
+        self.tokens = 0
+
+
+class FileStats:
+    """Class to store file statistics."""
+
+    def __init__(self):
+        self.line_count: int = 0
+        self.char_count: int = 0
+        self.token_count: int = 0
 
 
 class File:
@@ -20,6 +31,7 @@ class File:
         self.content_size = 0
         self.is_binary = False
         self.metadata = FileMetadata()
+        self.stats = FileStats()
 
     def __str__(self):
         return f"File(name={self.file_name}, size={self.metadata.size} bytes, modified={self.metadata.last_modified})"

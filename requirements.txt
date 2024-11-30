@@ -56,9 +56,12 @@ pyperclip==1.9.0
     # via -r requirements.in
 readme-renderer==44.0
     # via twine
+regex==2024.11.6
+    # via tiktoken
 requests==2.32.3
     # via
     #   requests-toolbelt
+    #   tiktoken
     #   twine
 requests-toolbelt==1.0.0
     # via twine
@@ -68,6 +71,8 @@ rich==13.8.0
     # via twine
 secretstorage==3.3.3
     # via keyring
+tiktoken==0.8.0
+    # via -r requirements.in
 twine==5.1.1
     # via -r requirements.in
 urllib3==2.2.2

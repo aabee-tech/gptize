@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 import pathspec
 import pyperclip
+import tiktoken
 from .models import File, Project
 from .settings import Settings
 from .output_builder import OutputBuilder
@@ -13,6 +14,14 @@ class GPTizer:
     def __init__(self):
         self._project = None
         self._gitignore = None
+
+        try:
+            logging.info(f"Loading tiktoken {Settings.TOKEN_MODEL_NAME} model")
+            self.encoder = tiktoken.get_encoding(Settings.TOKEN_MODEL_NAME)
+            logging.info(f"Loading tiktoken {Settings.TOKEN_MODEL_NAME} model complete")
+        except Exception as e:
+            self.encoder = None
+            logging.error(f"Failed to initialize tiktoken encoder: {e}")
 
     def process_directory(self, target_path: str, repo_root: str, gptize_ignore: str):
         """
@@ -132,9 +141,19 @@ class GPTizer:
                     lines = f.readlines()
                     file.content = ''.join(lines)
                     self.calculate_content_size(file)
+
+                    file.stats.line_count = len(lines)
+                    file.stats.char_count = len(file.content)
+
+                    if self.encoder:
+                        file.stats.token_count = len(self.encoder.encode(file.content))
+                    else:
+                        file.stats.token_count = 0
+
                     if len(lines) > Settings.WARN_LINES_COUNT:
                         logging.warning(f"File {relative_path} exceeds 700 lines ({len(lines)} lines).")
                     logging.info(f"Content of {relative_path} loaded with encoding {encoding}")
+                    logging.info(f"File {relative_path}: {file.stats.line_count} lines, {file.stats.char_count} characters, {file.stats.token_count} tokens.")
                     return None
             except UnicodeDecodeError:
                 continue
@@ -153,6 +172,42 @@ class GPTizer:
         Calculate the size of the content of a file in bytes.
         """
         file.content_size = len(file.content.encode('utf-8'))
+
+    def summarize_stats(self):
+        """
+        Summarize total tokens, lines, characters, and percentage of context usage.
+        """
+        total_lines = sum(f.line_count for f in self.project.files if hasattr(f, 'line_count'))
+        total_tokens = sum(f.token_count for f in self.project.files if hasattr(f, 'token_count'))
+        total_chars = sum(f.char_count for f in self.project.files if hasattr(f, 'char_count'))
+        max_context = Settings.GPT4O_CONTEXT_WINDOW
+
+        files_by_tokens = sorted(
+            (f for f in self.project.files if hasattr(f, 'token_count') and f.token_count > 0),
+            key=lambda x: x.token_count,
+            reverse=True
+        )
+        top_files = files_by_tokens[:Settings.TOP_TOKEN_FILES_COUNT]
+
+        logging.info(f"Top {Settings.TOP_TOKEN_FILES_COUNT} files by token count:")
+        for i, file in enumerate(top_files, start=1):
+            token_percentage = (file.token_count / max_context) * 100 if total_tokens > 0 else 0
+            logging.info(
+                f"{i}. {file.file_name} - {file.token_count} tokens "
+                f"({token_percentage:.2f}% of context), "
+                f"{file.line_count} lines, {file.char_count} characters"
+            )
+
+        logging.info(f"Total lines: {total_lines}")
+        logging.info(f"Total tokens: {total_tokens}")
+        logging.info(f"Total characters: {total_chars}")
+        context_usage_percent = (total_tokens / max_context) * 100
+        logging.info(f"GPT-4o context usage: {context_usage_percent:.2f}%")
+
+        if context_usage_percent > 100:
+            logging.error("CONTEXT WINDOW EXCEEDED: Total tokens exceed the maximum allowed by GPT-4o.")
+        elif context_usage_percent > 50:
+            logging.warning("Context usage exceeds 50%. GPT response quality may degrade.")
 
     def get_git_status(self):
         """
@@ -206,19 +261,11 @@ class GPTizer:
         if git_status:
             builder.write_git_status(git_status)
 
-        total_size = 0
-        total_tokens = 0
+        self.summarize_stats()
 
         for file in self.project.files:
             if file.is_binary:
                 continue  # Skip binary files
-
-            file_size = len(file.content.encode('utf-8'))
-            file_tokens = len(file.content.split())
-
-            total_size += file_size
-            total_tokens += file_tokens
-
             builder.write_file_content(file)
             builder.write_separator()
 
