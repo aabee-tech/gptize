@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [0.5.1] - 2024-12-01
+- [Fix] Fixed console summary statistics display
+
 ## [0.5.0] - 2024-12-01
 - [Feature] Added support for tokenization using `tiktoken`
   - Integrated `tiktoken` for accurate token counting.
