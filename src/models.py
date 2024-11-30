@@ -22,6 +22,9 @@ class File:
         self.content_size = 0
         self.is_binary = False
         self.metadata = FileMetadata()
+        self.line_count: int = 0
+        self.char_count: int = 0
+        self.token_count: int = 0
 
     def __str__(self):
         return f"File(name={self.file_name}, size={self.metadata.size} bytes, modified={self.metadata.last_modified})"
