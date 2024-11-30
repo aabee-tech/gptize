@@ -104,34 +104,40 @@ class GPTizer:
     def load_file_content(self, file: File) -> None:
         """
         Load content from a file and detect binary files.
+        Warn if the file contains more than 700 lines.
         """
+        relative_path = os.path.relpath(file.directory, self.project.root_path)
+
         try:
             with open(file.directory, 'rb') as f:
                 if b'\0' in f.read(1024):
                     file.is_binary = True
-                    logging.info(f"Binary file detected: {file.file_name}")
+                    logging.info(f"Binary file detected: {relative_path}")
                     return None
         except IOError as e:
-            logging.error(f"Error reading file {file.directory}: {e}")
+            logging.error(f"Error reading file {relative_path}: {e}")
             return None
 
         for encoding in Settings.DEFAULT_ENCODINGS:
             try:
                 with open(file.directory, 'r', encoding=encoding) as f:
-                    file.content = f.read()
+                    lines = f.readlines()
+                    file.content = ''.join(lines)
                     self.calculate_content_size(file)
-                    logging.info(f"Content of {file.file_name} loaded with encoding {encoding}")
+                    if len(lines) > 700:
+                        logging.warning(f"File {relative_path} exceeds 700 lines ({len(lines)} lines).")
+                    logging.info(f"Content of {relative_path} loaded with encoding {encoding}")
                     return None
             except UnicodeDecodeError:
                 continue
             except IOError as e:
-                logging.error(f"Error reading file {file.directory}: {e}")
+                logging.error(f"Error reading file {relative_path}: {e}")
                 return None
             except Exception as e:
-                logging.error(f"An unexpected error occurred while reading {file.file_name}: {e}")
+                logging.error(f"An unexpected error occurred while reading {relative_path}: {e}")
                 return None
 
-        logging.error(f"Failed to read {file.file_name} in any known encoding")
+        logging.error(f"Failed to read {relative_path} in any known encoding")
         return None
 
     def calculate_content_size(self, file: File) -> None:
