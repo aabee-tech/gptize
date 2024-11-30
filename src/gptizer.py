@@ -174,7 +174,6 @@ class GPTizer:
             logging.warning(f"Could not fetch git details: {e}")
             return "Git information not available."
 
-
     def combine_files(self) -> str:
         """
         Combine the content of all files into a single string using OutputBuilder.
