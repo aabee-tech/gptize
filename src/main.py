@@ -8,17 +8,17 @@ from .settings import Settings
 def parse_arguments():
     default_output = Settings.default_output_file()
     parser = argparse.ArgumentParser(
-        description="Gptize is a tool designed to concatenate the contents of project files into a single text file. It's specifically tailored for creating datasets that can be uploaded into ChatGPT for analysis or training.")
+        )
     parser.add_argument("target", nargs='?', type=str, default=os.getcwd(),
-                        help="Target file or directory to process (default: current directory)")
+                        )
     parser.add_argument("-o", "--output", type=str, default=default_output,
-                        help=f"Output file path (default: {default_output})")
+                        )
     parser.add_argument("--ignore", type=str, default='.gptignore',
-                        help="Custom .gitignore file for gptize (default: .gptignore)")
+                        )
     parser.add_argument("--repo-root", type=str, default=os.getcwd(),
-                        help="Root directory of the repository where .gitignore is located (default: current directory)")
+                        )
     parser.add_argument("--debug", action="store_true",
-                        help="Enable debug logging (saves to gptize.log in the current directory)")
+                        )
     return parser.parse_args()
 
 
