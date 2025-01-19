@@ -7,8 +7,7 @@ from .settings import Settings
 
 def parse_arguments():
     default_output = Settings.default_output_file()
-    parser = argparse.ArgumentParser(
-        )
+    parser = argparse.ArgumentParser()
     parser.add_argument("target", nargs='?', type=str, default=os.getcwd(),
                         )
     parser.add_argument("-o", "--output", type=str, default=default_output,
